@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<title>SIMI Scanner</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #f7f7f7;
+  --white: #ffffff;
+  --border: #e2e2e2;
+  --text: #111111;
+  --text2: #666666;
+  --text3: #aaaaaa;
+  --accent: #111111;
+  --danger: #cc2200;
+  --danger-bg: #fff0ee;
+  --success-bg: #efffee;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+.screen.active { display: flex; }
+
+/* ══════════════════════════════
+   SCREEN 1 — HOME
+══════════════════════════════ */
+#screen-home {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  gap: 12px;
+  background: var(--white);
+}
+
+.home-logo {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.home-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+.home-sub {
+  font-size: 14px;
+  color: var(--text2);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.btn-home {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: background 0.15s;
+}
+.btn-home:active { background: var(--bg); }
+.btn-home .icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.btn-home .btn-texts { display: flex; flex-direction: column; text-align: left; }
+.btn-home .btn-sub { font-size: 12px; font-weight: 400; color: var(--text3); margin-top: 2px; }
+
+.divider { width: 100%; height: 1px; background: var(--border); margin: 4px 0; }
+
+/* ══════════════════════════════
+   SCREEN 2 — SETUP
+══════════════════════════════ */
+#screen-setup { background: var(--white); }
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  background: var(--white);
+  position: sticky; top: 0; z-index: 10;
+}
+.nav-back {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.nav-title { font-size: 16px; font-weight: 700; }
+
+.setup-body { padding: 20px 20px; display: flex; flex-direction: column; gap: 18px; flex: 1; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: 0.03em; text-transform: uppercase; }
+.field-input {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 15px;
+  padding: 12px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-input::placeholder { color: var(--text3); }
+
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cat-btn {
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.cat-btn.selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+
+/* Maestra */
+.maestra-info {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--border);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.maestra-loaded {
+  background: var(--success-bg);
+  border-color: #aaddaa;
+  border-style: solid;
+}
+.maestra-text { font-size: 13px; color: var(--text2); }
+.maestra-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.maestra-count { font-size: 11px; color: var(--text3); }
+.maestra-action { font-size: 12px; font-weight: 600; color: var(--accent); }
+
+.btn-start {
+  background: var(--accent);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-top: auto;
+  transition: opacity 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-start:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-start:not(:disabled):active { opacity: 0.8; }
+
+/* ══════════════════════════════
+   SCREEN 3 — SCANNER
+══════════════════════════════ */
+#screen-scanner { background: var(--bg); }
+
+.scan-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.scan-session { display: flex; flex-direction: column; }
+.scan-session-name { font-size: 15px; font-weight: 700; }
+.scan-session-cat { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.scan-header-right { display: flex; align-items: center; gap: 8px; }
+
+/* Counter */
+.counter-card {
+  background: var(--white);
+  margin: 12px 12px 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.counter-left { display: flex; flex-direction: column; gap: 2px; }
+.counter-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+.counter-num {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--text);
+  transition: transform 0.08s;
+}
+.counter-num.bump { transform: scale(1.1); }
+.counter-skus { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.counter-right { text-align: right; }
+.counter-file { font-size: 11px; color: var(--text3); }
+.counter-filename { font-size: 13px; font-weight: 600; color: var(--text2); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Last scan */
+.last-scan-card {
+  background: var(--white);
+  margin: 8px 12px 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.last-scan-card.flash-ok { border-color: #44bb44; background: var(--success-bg); }
+.last-scan-card.flash-err { border-color: #cc2200; background: var(--danger-bg); }
+.last-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.last-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.last-time { font-size: 11px; color: var(--text3); }
+.last-code { font-size: 16px; font-weight: 700; color: var(--text); margin-top: 3px; font-family: 'Courier New', monospace; }
+.last-name { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.last-qty-badge {
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+/* Undo */
+.undo-btn {
+  margin: 8px 12px 0;
+  background: var(--danger-bg);
+  border: 1px solid #ffbbaa;
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 11px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+  -webkit-appearance: none;
+}
+.undo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.undo-btn:not(:disabled):active { opacity: 0.7; }
+
+/* Hidden scan input */
+#scanInput {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+/* List */
+.list-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px 6px;
+}
+.list-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+.list-total { font-size: 11px; color: var(--text3); }
+
+.items-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.item-row {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+.item-row.new-item { border-color: #aaccaa; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.item-code { font-size: 13px; font-family: 'Courier New', monospace; font-weight: 600; color: var(--text); }
+.item-name { font-size: 11px; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-qty {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px; font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  min-width: 42px;
+  text-align: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text3);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.empty-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+
+/* Footer */
+.footer-actions {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+  padding: 16px 12px 28px;
+  display: flex;
+  gap: 8px;
+}
+.btn-export {
+  flex: 1;
+  background: var(--accent);
+  color: white;
+  font-size: 15px; font-weight: 700;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-export:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-export:not(:disabled):active { opacity: 0.8; }
+.btn-secondary {
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 13px; font-weight: 600;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-secondary:active { background: var(--bg); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #222;
+  color: white;
+  font-size: 13px; font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 30px;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Modal */
+.modal-bg {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 500;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--white);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%; max-width: 480px;
+  animation: slideUp 0.22s ease;
+}
+@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.modal p { font-size: 14px; color: var(--text2); margin-bottom: 22px; line-height: 1.5; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns button { flex: 1; padding: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; border: none; cursor: pointer; }
+.btn-cancel { background: var(--bg); color: var(--text2); }
+.btn-confirm-danger { background: var(--danger); color: white; }
+
+/* File input hidden */
+#fileInput { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ══ SCREEN 1: HOME ══ -->
+<div id="screen-home" class="screen active">
+  <div class="home-logo">SIMI</div>
+  <div class="home-title">Scanner de<br>Inventario</div>
+  <div class="home-sub">Selecciona una opción para comenzar</div>
+
+  <button class="btn-home" onclick="goSetup('Recepción')">
+    <div class="icon">📦</div>
+    <div class="btn-texts">
+      <span>Recepción de productos</span>
+      <span class="btn-sub">Registra mercadería entrante</span>
+    </div>
+  </button>
+
+  <button class="btn-home" onclick="goSetup('Inventario')">
+    <div class="icon">📋</div>
+    <div class="btn-texts">
+      <span>Conteo de inventario</span>
+      <span class="btn-sub">Auditoría y control de stock</span>
+    </div>
+  </button>
+
+  <button class="btn-home" onclick="goSetup('Control')">
+    <div class="icon">🔍</div>
+    <div class="btn-texts">
+      <span>Control de stock</span>
+      <span class="btn-sub">Verificación de existencias</span>
+    </div>
+  </button>
+
+  <button class="btn-home" onclick="goSetup('Otro')">
+    <div class="icon">📄</div>
+    <div class="btn-texts">
+      <span>Otro</span>
+      <span class="btn-sub">Sesión personalizada</span>
+    </div>
+  </button>
+</div>
+
+<!-- ══ SCREEN 2: SETUP ══ -->
+<div id="screen-setup" class="screen">
+  <div class="nav-bar">
+    <button class="nav-back" onclick="goHome()">←</button>
+    <span class="nav-title" id="setup-title">Nueva sesión</span>
+  </div>
+  <div class="setup-body">
+
+    <div class="field">
+      <div class="field-label">Nombre del archivo</div>
+      <input class="field-input" id="fileName" placeholder="ej. recepcion_lunes_local3" type="text"
+        oninput="validateSetup()" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">Categoría</div>
+      <div class="cat-grid" id="catGrid">
+        <button class="cat-btn" onclick="selectCat(this, 'Recepción')">Recepción</button>
+        <button class="cat-btn" onclick="selectCat(this, 'Inventario')">Inventario</button>
+        <button class="cat-btn" onclick="selectCat(this, 'Control')">Control</button>
+        <button class="cat-btn" onclick="selectCat(this, 'Otro')">Otro</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Maestra de productos <span style="font-weight:400;color:var(--text3)">(opcional)</span></div>
+      <div class="maestra-info" id="maestraInfo" onclick="document.getElementById('fileInput').click()">
+        <div>
+          <div class="maestra-text" id="maestraText">Toca para cargar CSV o Excel</div>
+          <div class="maestra-count" id="maestraCount">Permite ver el nombre del producto al escanear</div>
+        </div>
+        <div class="maestra-action" id="maestraAction">Cargar</div>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="loadMaestra(event)" />
+    </div>
+
+    <button class="btn-start" id="btnStart" onclick="startScan()" disabled>
+      Comenzar escaneo
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: SCANNER ══ -->
+<div id="screen-scanner" class="screen">
+  <div class="scan-header">
+    <div class="scan-session">
+      <div class="scan-session-name" id="scanFileName">—</div>
+      <div class="scan-session-cat" id="scanCatLabel">—</div>
+    </div>
+    <div class="scan-header-right">
+      <button class="btn-secondary" style="padding:8px 12px;font-size:12px;" onclick="openFinishModal()">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- Hidden input que captura el escáner -->
+  <input id="scanInput" type="text" autocomplete="off" autocorrect="off"
+    autocapitalize="off" spellcheck="false" inputmode="none" readonly />
+
+  <!-- Contador -->
+  <div class="counter-card">
+    <div class="counter-left">
+      <div class="counter-label">Unidades</div>
+      <div class="counter-num" id="counterNum">0</div>
+      <div class="counter-skus" id="counterSkus">0 códigos distintos</div>
+    </div>
+    <div class="counter-right">
+      <div class="counter-file">Archivo</div>
+      <div class="counter-filename" id="counterFilename">—</div>
+    </div>
+  </div>
+
+  <!-- Último escaneo -->
+  <div class="last-scan-card" id="lastScanCard">
+    <div class="last-top">
+      <div class="last-label">Último escaneo</div>
+      <div class="last-time" id="lastTime">—</div>
+    </div>
+    <div class="last-code" id="lastCode">Esperando escaneo...</div>
+    <div class="last-name" id="lastName"></div>
+  </div>
+
+  <!-- Deshacer -->
+  <button class="undo-btn" id="undoBtn" onclick="undoLast()" disabled>
+    ↩ Omitir último escaneo
+  </button>
+
+  <!-- Lista -->
+  <div class="list-header">
+    <span class="list-title">Detalle</span>
+    <span class="list-total" id="listTotal">0 ítems</span>
+  </div>
+  <div class="items-list" id="itemsList">
+    <div class="empty-state">
+      <span class="empty-icon">⬡</span>
+      Presiona el botón del escáner<br>para comenzar a registrar.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-actions">
+    <button class="btn-export" id="exportBtn" onclick="exportCSV()" disabled>
+      Exportar CSV
+    </button>
+    <button class="btn-secondary" onclick="openClearModal()">Limpiar</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal finalizar -->
+<div class="modal-bg" id="modalFinish">
+  <div class="modal">
+    <h3>Finalizar sesión</h3>
+    <p>¿Deseas exportar el archivo CSV antes de salir? Los datos se perderán si no exportas.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModals(); goHome()">Salir sin exportar</button>
+      <button class="btn-confirm-danger" style="background:var(--accent)" onclick="exportCSV(); closeModals(); goHome()">Exportar y salir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal limpiar -->
+<div class="modal-bg" id="modalClear">
+  <div class="modal">
+    <h3>Limpiar sesión</h3>
+    <p>Se borrarán todos los escaneos registrados. Esta acción no se puede deshacer.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModals()">Cancelar</button>
+      <button class="btn-confirm-danger" onclick="clearAll(); closeModals()">Limpiar todo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let state = {
+  category: '',
+  fileName: '',
+  items: [],       // { code, name, count, lastTime }
+  history: [],     // undo stack
+  maestra: {},     // { code: { name, price } }
+  maestraLoaded: false,
+  maestraName: ''
+};
+
+// ── NAVIGATION ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  showScreen('screen-home');
+}
+
+function goSetup(cat) {
+  state.category = cat;
+  document.getElementById('setup-title').textContent = cat;
+  // pre-select category button
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === cat);
+  });
+  validateSetup();
+  showScreen('screen-setup');
+}
+
+function selectCat(btn, cat) {
+  state.category = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  validateSetup();
+}
+
+function validateSetup() {
+  const name = document.getElementById('fileName').value.trim();
+  document.getElementById('btnStart').disabled = !name || !state.category;
+}
+
+// ── MAESTRA LOADING ──
+function loadMaestra(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      parseCSVMaestra(e.target.result, file.name);
+    };
+    reader.readAsText(e, 'UTF-8');
+    // retry with event target
+    const r2 = new FileReader();
+    r2.onload = (ev) => parseCSVMaestra(ev.target.result, file.name);
+    r2.readAsText(file, 'UTF-8');
+  } else {
+    // For xlsx we'd need a library — show message
+    showToast('Convierte el Excel a CSV para cargarlo', '');
+    // Still show as "loaded" with filename only for UX
+    state.maestraLoaded = false;
+    document.getElementById('maestraText').textContent = file.name;
+    document.getElementById('maestraCount').textContent = 'Convierte a CSV para ver nombres de productos';
+    document.getElementById('maestraAction').textContent = 'Cambiar';
+  }
+}
+
+function parseCSVMaestra(text, filename) {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) { showToast('CSV vacío o inválido', ''); return; }
+
+  // Detect separator
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/['"]/g,''));
+
+  // Find column indices
+  const codeIdx = headers.findIndex(h => h.includes('codigo') || h.includes('código') || h.includes('code') || h.includes('sku') || h === 'id');
+  const nameIdx = headers.findIndex(h => h.includes('nombre') || h.includes('name') || h.includes('descripcion') || h.includes('descripción') || h.includes('producto'));
+  const priceIdx = headers.findIndex(h => h.includes('precio') || h.includes('price'));
+
+  if (codeIdx === -1) { showToast('No se encontró columna de código', ''); return; }
+
+  const maestra = {};
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(sep).map(c => c.trim().replace(/^["']|["']$/g,''));
+    const code = cols[codeIdx];
+    if (!code) continue;
+    maestra[code] = {
+      name: nameIdx >= 0 ? cols[nameIdx] || '' : '',
+      price: priceIdx >= 0 ? cols[priceIdx] || '' : ''
+    };
+  }
+
+  const count = Object.keys(maestra).length;
+  state.maestra = maestra;
+  state.maestraLoaded = true;
+  state.maestraName = filename;
+
+  document.getElementById('maestraInfo').classList.add('maestra-loaded');
+  document.getElementById('maestraText').textContent = filename;
+  document.getElementById('maestraCount').textContent = `${count} productos cargados`;
+  document.getElementById('maestraAction').textContent = 'Cambiar';
+  showToast(`Maestra cargada: ${count} productos`, '');
+}
+
+// ── START SCAN ──
+function startScan() {
+  const name = document.getElementById('fileName').value.trim().replace(/\s+/g, '_');
+  state.fileName = name;
+  state.items = [];
+  state.history = [];
+
+  document.getElementById('scanFileName').textContent = name;
+  document.getElementById('scanCatLabel').textContent = state.category;
+  document.getElementById('counterFilename').textContent = name;
+  document.getElementById('counterNum').textContent = '0';
+  document.getElementById('counterSkus').textContent = '0 códigos distintos';
+  document.getElementById('lastCode').textContent = 'Esperando escaneo...';
+  document.getElementById('lastName').textContent = '';
+  document.getElementById('lastTime').textContent = '—';
+  document.getElementById('undoBtn').disabled = true;
+  document.getElementById('exportBtn').disabled = true;
+  renderList();
+
+  showScreen('screen-scanner');
+
+  // Focus hidden input to capture scanner
+  setTimeout(() => {
+    const si = document.getElementById('scanInput');
+    si.removeAttribute('readonly');
+    si.focus();
+  }, 300);
+}
+
+// ── SCANNER INPUT ──
+const scanInput = document.getElementById('scanInput');
+let bufferTimer = null;
+
+// Keep focus on hidden input
+document.addEventListener('click', (e) => {
+  const screen = document.querySelector('.screen.active');
+  if (screen && screen.id === 'screen-scanner') {
+    if (!e.target.closest('button') && !e.target.closest('.modal-bg')) {
+      scanInput.focus();
+    }
+  }
+});
+
+document.addEventListener('touchend', (e) => {
+  const screen = document.querySelector('.screen.active');
+  if (screen && screen.id === 'screen-scanner') {
+    if (!e.target.closest('button') && !e.target.closest('.modal-bg')) {
+      setTimeout(() => scanInput.focus(), 100);
+    }
+  }
+});
+
+scanInput.addEventListener('input', () => {
+  clearTimeout(bufferTimer);
+  bufferTimer = setTimeout(() => {
+    const val = scanInput.value.trim();
+    if (val.length >= 3) {
+      processCode(val);
+      scanInput.value = '';
+    }
+  }, 80);
+});
+
+scanInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    clearTimeout(bufferTimer);
+    const val = scanInput.value.trim();
+    if (val.length >= 3) {
+      processCode(val);
+      scanInput.value = '';
+    }
+    e.preventDefault();
+  }
+});
+
+// ── PROCESS CODE ──
+function processCode(code) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  // Save undo snapshot
+  state.history.push(JSON.parse(JSON.stringify(state.items)));
+
+  const existing = state.items.find(i => i.code === code);
+  const productInfo = state.maestra[code] || { name: '', price: '' };
+
+  if (existing) {
+    existing.count++;
+    existing.lastTime = timeStr;
+  } else {
+    state.items.unshift({ code, name: productInfo.name, count: 1, lastTime: timeStr });
+  }
+
+  // Update last scan UI
+  const card = document.getElementById('lastScanCard');
+  document.getElementById('lastCode').textContent = code;
+  document.getElementById('lastName').textContent = productInfo.name || (state.maestraLoaded ? 'Código no encontrado en maestra' : '');
+  document.getElementById('lastTime').textContent = timeStr;
+
+  card.classList.remove('flash-ok', 'flash-err');
+  void card.offsetWidth;
+  card.classList.add(productInfo.name || !state.maestraLoaded ? 'flash-ok' : 'flash-err');
+  setTimeout(() => card.classList.remove('flash-ok', 'flash-err'), 600);
+
+  // Bump counter
+  const cn = document.getElementById('counterNum');
+  cn.classList.add('bump');
+  setTimeout(() => cn.classList.remove('bump'), 100);
+
+  document.getElementById('undoBtn').disabled = false;
+  document.getElementById('exportBtn').disabled = false;
+
+  updateCounters();
+  renderList();
+}
+
+// ── UNDO ──
+function undoLast() {
+  if (state.history.length === 0) return;
+  state.items = state.history.pop();
+
+  if (state.history.length === 0) document.getElementById('undoBtn').disabled = true;
+
+  if (state.items.length > 0) {
+    const last = state.items[0];
+    document.getElementById('lastCode').textContent = last.code;
+    document.getElementById('lastName').textContent = last.name || '';
+  } else {
+    document.getElementById('lastCode').textContent = 'Esperando escaneo...';
+    document.getElementById('lastName').textContent = '';
+    document.getElementById('exportBtn').disabled = true;
+  }
+
+  updateCounters();
+  renderList();
+  showToast('Último escaneo eliminado');
+}
+
+// ── UI UPDATES ──
+function updateCounters() {
+  const total = state.items.reduce((s, i) => s + i.count, 0);
+  document.getElementById('counterNum').textContent = total;
+  document.getElementById('counterSkus').textContent =
+    `${state.items.length} código${state.items.length !== 1 ? 's' : ''} distinto${state.items.length !== 1 ? 's' : ''}`;
+  document.getElementById('listTotal').textContent =
+    `${state.items.length} ítem${state.items.length !== 1 ? 's' : ''}`;
+}
+
+function renderList() {
+  const list = document.getElementById('itemsList');
+  if (state.items.length === 0) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">⬡</span>Presiona el botón del escáner<br>para comenzar a registrar.</div>`;
+    return;
+  }
+  list.innerHTML = state.items.map((item, idx) => `
+    <div class="item-row ${idx === 0 ? 'new-item' : ''}">
+      <div>
+        <div class="item-code">${item.code}</div>
+        ${item.name ? `<div class="item-name">${item.name}</div>` : ''}
+      </div>
+      <div class="item-qty">×${item.count}</div>
+    </div>
+  `).join('');
+}
+
+// ── EXPORT ──
+function exportCSV() {
+  if (state.items.length === 0) return;
+  const now = new Date();
+  const total = state.items.reduce((s, i) => s + i.count, 0);
+  const dateStr = now.toLocaleDateString('es-CL').replace(/\//g, '-');
+
+  const lines = [
+    `# SIMI Scanner`,
+    `# Archivo: ${state.fileName}`,
+    `# Categoria: ${state.category}`,
+    `# Fecha: ${now.toLocaleDateString('es-CL')} ${now.toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'})}`,
+    `# Total unidades: ${total}`,
+    `# Codigos distintos: ${state.items.length}`,
+    ``,
+    `CODIGO,NOMBRE,CANTIDAD,ULTIMO_ESCANEO`,
+    ...state.items.map(i => `${i.code},"${i.name}",${i.count},${i.lastTime}`)
+  ].join('\n');
+
+  const blob = new Blob(['\uFEFF' + lines], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${state.fileName}_${dateStr}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Exportado: ${state.fileName}_${dateStr}.csv`);
+}
+
+// ── MODALS ──
+function openFinishModal() { document.getElementById('modalFinish').classList.add('open'); }
+function openClearModal() { document.getElementById('modalClear').classList.add('open'); }
+function closeModals() {
+  document.getElementById('modalFinish').classList.remove('open');
+  document.getElementById('modalClear').classList.remove('open');
+}
+
+function clearAll() {
+  state.items = [];
+  state.history = [];
+  document.getElementById('lastCode').textContent = 'Esperando escaneo...';
+  document.getElementById('lastName').textContent = '';
+  document.getElementById('undoBtn').disabled = true;
+  document.getElementById('exportBtn').disabled = true;
+  updateCounters();
+  renderList();
+  showToast('Sesión limpiada');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── SERVICE WORKER REGISTER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
